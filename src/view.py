@@ -1,5 +1,6 @@
 import sys
 import pygame
+from busca import MAPA
 
 TAMANHO_DO_BLOCO = 8
 NUMERO_DE_LINHAS = 105
@@ -7,8 +8,6 @@ NUMERO_DE_COLUNAS = 200
 LARGURA_DA_TELA = NUMERO_DE_COLUNAS * TAMANHO_DO_BLOCO
 ALTURA_DA_TELA = NUMERO_DE_LINHAS * TAMANHO_DO_BLOCO
 LINHAS_DE_APOIO = True
-
-MAPA = []
 
 
 def getCor(value: str) -> tuple:
@@ -32,15 +31,6 @@ def getCor(value: str) -> tuple:
     else:
         return (0, 0, 0)
 
-
-def loadMapa() -> None:
-    with open('mapa.txt', 'r') as file:
-        lines = file.readlines()
-        for i in range(len(lines)):
-            MAPA.append([])
-            for j in range(len(lines[i]) - 1):
-                MAPA[i].append(lines[i][j])
-                # botar pra atualizar o numero de linhas e colunas e a largura e altura da tela
 
 
 def main():
@@ -66,8 +56,6 @@ def main():
         pygame.display.update()
 
 
-
-loadMapa()
 main()
 
 
