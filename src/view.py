@@ -1,7 +1,5 @@
 import sys
 import pygame
-import matplotlib.pyplot as plt
-
 
 TAMANHO_DO_BLOCO = 8
 NUMERO_DE_LINHAS = 105
