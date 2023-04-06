@@ -98,7 +98,7 @@ def getValor(quadrado: str) -> int:
 loadMapa()
 
 class AEstrela:
-    def neighbors(self, coord:tuple(int,int)) -> list(tuple(str, tuple(int, int))):
+    def neighbors(self, coord:tuple[int,int]) -> list[tuple[str, tuple[int, int]]]:
         row, col = coord
         candidates = [
             ("up", (row - 1, col)),
