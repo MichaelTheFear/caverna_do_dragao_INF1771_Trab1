@@ -28,6 +28,8 @@ def getCor(value: str) -> tuple:
     elif value == 'M':
 
         return (139, 69, 19)
+    elif value == '0':
+        return (255, 100, 20)
     else:
         return (0, 0, 0)
 
@@ -39,9 +41,10 @@ def main():
     SCREEN = pygame.display.set_mode((LARGURA_DA_TELA, ALTURA_DA_TELA))
     CLOCK = pygame.time.Clock()
     SCREEN.fill((0, 0, 0))
-    for linha in range(len(MAPA)):
-        for coluna in range(len(MAPA[linha])):
-            pygame.draw.rect(SCREEN, getCor(MAPA[linha][coluna]), (coluna * TAMANHO_DO_BLOCO, linha * TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO))
+
+    for linha in range(MAPA.height):
+        for coluna in range(MAPA.width):
+            pygame.draw.rect(SCREEN, getCor(MAPA.mapa[linha][coluna]), (coluna * TAMANHO_DO_BLOCO, linha * TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO))
             if LINHAS_DE_APOIO:
                 pygame.draw.rect(SCREEN, (0, 0, 0), (coluna * TAMANHO_DO_BLOCO, linha * TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO), 1)
 
