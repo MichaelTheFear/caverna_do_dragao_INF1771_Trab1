@@ -190,8 +190,6 @@ class Mapa():
 
 MAPA = Mapa()
 
-def manhattan(current: Node, goal: Node) -> int:
-    return (abs(goal.coord[0] - current.coord[0]) + abs(goal.coord[1] - current.coord[1]))
 
 class Node():
     def __init__(self, coord, parent):
@@ -206,20 +204,23 @@ class Node():
         return self.position == other.position
 
 
+def manhattan(current: Node, goal: Node) -> int:
+    return (abs(goal.coord[0] - current.coord[0]) + abs(goal.coord[1] - current.coord[1]))
+
 class CoordList():
     def __init__(self):
         self.coordList = []
 
-    def add(self, node):
+    def add(self, node:Node) -> None:
         self.coordList.append(node)
     
-    def contains_coord(self, coord):
+    def contains_coord(self, coord) -> bool: #ver os tipos do coord
         return any(node.coord == coord for node in self.coordList)
     
-    def empty(self):
+    def empty(self) -> bool:
         return len(self.coordList) == 0
     
-    def remove(self):
+    def remove(self) -> Node:
         if self.empty():
             raise Exception("empty OpenList.coordList")
         else:
