@@ -169,7 +169,9 @@ class Mapa():
         elif evento == 'Z':
             return 260
         
-    def getValor(quadrado: str) -> int:
+    def getValor(self, coord: tuple[int, int]) -> int:
+        quadrado = self.mapa[coord[0]][coord[1]]
+        
         if quadrado == '.':
             return 1
         elif quadrado == 'R':
@@ -184,8 +186,12 @@ class Mapa():
             return 100
         else:
             return 1
+        
 
 MAPA = Mapa()
+
+def manhattan(current: Node, goal: Node) -> int:
+    return (abs(goal.coord[0] - current.coord[0]) + abs(goal.coord[1] - current.coord[1]))
 
 class Node():
     def __init__(self, coord, parent):
@@ -277,5 +283,15 @@ class AEstrela:
             
             #Get the neighbors
             for neighborNode in self.neighbors(currentNode):
-                if neighborNode not in openList and neighborNode not in closedList:
-                    openList.append(neighborNode)
+                if neighborNode in closedList:
+                    continue
+                
+                neighborNode.g = MAPA.getValor(neighborNode.coord)
+                neighborNode.h = manhattan(neighborNode, goalNode)
+                neighborNode.f = neighborNode.g + neighborNode.h
+                
+                for openNode in openList:
+                    if neighborNode == openNode and neighborNode.f > openNode.f:
+                        continue
+                
+                openList.append(neighborNode)
