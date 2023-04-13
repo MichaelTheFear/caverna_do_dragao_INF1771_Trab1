@@ -252,8 +252,8 @@ class AEstrela:
         goalNode = Node(goal, None, None)
 
         #Creating Open and Closed list
-        openList = []
-        closedList = []
+        openList:list[Node] = []
+        closedList:list[Node] = []
 
         #Adding startNode to openList
         openList.append(startNode)
@@ -287,12 +287,12 @@ class AEstrela:
                 if neighborNode in closedList:
                     continue
                 
-                neighborNode.g = MAPA.getValor(neighborNode.coord)
+                neighborNode.g = currentNode.g + MAPA.getValor(neighborNode.coord)
                 neighborNode.h = manhattan(neighborNode, goalNode)
                 neighborNode.f = neighborNode.g + neighborNode.h
                 
                 for openNode in openList:
-                    if neighborNode == openNode and neighborNode.f > openNode.f:
+                    if neighborNode == openNode and neighborNode.g > openNode.g:
                         continue
                 
                 openList.append(neighborNode)
