@@ -1,13 +1,13 @@
 import sys
 import pygame
-from busca import MAPA
+from busca import MAPA, AEstrela
 
 TAMANHO_DO_BLOCO = 8
 NUMERO_DE_LINHAS = 105
 NUMERO_DE_COLUNAS = 200
 LARGURA_DA_TELA = NUMERO_DE_COLUNAS * TAMANHO_DO_BLOCO
 ALTURA_DA_TELA = NUMERO_DE_LINHAS * TAMANHO_DO_BLOCO
-LINHAS_DE_APOIO = False
+LINHAS_DE_APOIO = True
 
 
 def getCor(value: str) -> tuple:
@@ -30,10 +30,15 @@ def getCor(value: str) -> tuple:
         return (139, 69, 19)
     elif value == '0':
         return (255, 100, 20)
+    elif value == '1':
+        return (255, 100, 20)
     else:
         return (0, 0, 0)
 
 
+
+nos = AEstrela().solve(MAPA.eventos['0'], MAPA.eventos['1'])
+print(nos)
 
 def main():
     global SCREEN, CLOCK
@@ -44,9 +49,14 @@ def main():
 
     for linha in range(MAPA.height):
         for coluna in range(MAPA.width):
-            pygame.draw.rect(SCREEN, getCor(MAPA.mapa[linha][coluna]), (coluna * TAMANHO_DO_BLOCO, linha * TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO))
-            if LINHAS_DE_APOIO:
-                pygame.draw.rect(SCREEN, (0, 0, 0), (coluna * TAMANHO_DO_BLOCO, linha * TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO), 1)
+            if (linha, coluna) in nos:
+                pygame.draw.rect(SCREEN,(255, 100, 20), (coluna * TAMANHO_DO_BLOCO, linha * TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO))
+                if LINHAS_DE_APOIO:
+                    pygame.draw.rect(SCREEN, (255, 100, 20), (coluna * TAMANHO_DO_BLOCO, linha * TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO), 1)
+            else:
+                pygame.draw.rect(SCREEN, getCor(MAPA.mapa[linha][coluna]), (coluna * TAMANHO_DO_BLOCO, linha * TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO))
+                if LINHAS_DE_APOIO:
+                    pygame.draw.rect(SCREEN, (0, 0, 0), (coluna * TAMANHO_DO_BLOCO, linha * TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO), 1)
 
     
 

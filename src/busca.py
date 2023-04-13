@@ -96,6 +96,8 @@ def getValor(quadrado: str) -> int:
 loadMapa()
 '''
 
+
+
 class Mapa():
     def __init__(self):
         with open('mapa.txt', 'r') as file:
@@ -105,10 +107,13 @@ class Mapa():
         self.width = max(len(line) for line in lines)
 
         self.mapa = []
+        self.eventos = {}
         for i in range(self.height):
             row = []
             for j in range(len(lines[i])):
                 row.append(lines[i][j])
+                if lines[i][j] in '0123456789BCDEGHIJKLMNOPQSTUWYZ':
+                    self.eventos[lines[i][j]] = (i, j)
             self.mapa.append(row)
  
     def getDificuldade(evento: str) -> int:
@@ -201,7 +206,10 @@ class Node():
         self.h = 0
 
     def __eq__(self, other):
-        return self.position == other.position
+        if other == None:
+            return False
+
+        return self.coord == other.coord
 
 
 def manhattan(current: Node, goal: Node) -> int:
@@ -246,10 +254,11 @@ class AEstrela:
                 result.append(candNode)
         return result
     
-    def solve(self, start:tuple[int,int], goal:tuple[int,int]):
+    def solve(self, start:tuple[int,int], goal:tuple[int,int]) -> list[tuple[int,int]]:
         #Creating start and goal nodes
-        startNode = Node(start, None, None)
-        goalNode = Node(goal, None, None)
+        print(start, goal)
+        startNode = Node(start, None)
+        goalNode = Node(goal, None)
 
         #Creating Open and Closed list
         openList:list[Node] = []
@@ -275,24 +284,39 @@ class AEstrela:
 
             #Found the goal
             if currentNode == goalNode:
-                path =[]
+                print("Found the goal")
+                path=[]
                 node = currentNode
                 while node != None:
                     path.append(node.coord)
                     node = node.parent
-                return path.reverse
+                return path[::-1]
             
-            #Get the neighbors
+            
+            
             for neighborNode in self.neighbors(currentNode):
                 if neighborNode in closedList:
                     continue
                 
-                neighborNode.g = currentNode.g + MAPA.getValor(neighborNode.coord)
+                tentative_g = currentNode.g + MAPA.getValor(neighborNode.coord)
+                if neighborNode not in openList:
+                    openList.append(neighborNode)
+                else:
+                    for node in openList:
+                        if node == neighborNode:
+                            neighborNode = node
+                            break
+
+                    if tentative_g >= neighborNode.g:
+                        continue
+
+                neighborNode.parent = currentNode
+                neighborNode.g = tentative_g
                 neighborNode.h = manhattan(neighborNode, goalNode)
                 neighborNode.f = neighborNode.g + neighborNode.h
+
+            
                 
-                for openNode in openList:
-                    if neighborNode == openNode and neighborNode.g > openNode.g:
-                        continue
                 
-                openList.append(neighborNode)
+
+
