@@ -7,7 +7,7 @@ NUMERO_DE_LINHAS = 105
 NUMERO_DE_COLUNAS = 200
 LARGURA_DA_TELA = NUMERO_DE_COLUNAS * TAMANHO_DO_BLOCO
 ALTURA_DA_TELA = NUMERO_DE_LINHAS * TAMANHO_DO_BLOCO
-LINHAS_DE_APOIO = True
+LINHAS_DE_APOIO = False
 
 
 def getCor(value: str) -> tuple:
@@ -36,10 +36,12 @@ def getCor(value: str) -> tuple:
         return (0, 0, 0)
 
 
+i = 0
+j = 1
+eventos = MAPA.eventos
+busca = AEstrela().solve(eventos["0"], eventos["1"])
 
-nos = AEstrela().solve(MAPA.eventos['0'], MAPA.eventos['1'])
-print(nos)
-
+print(eventos)
 def main():
     global SCREEN, CLOCK
     pygame.init()
@@ -49,14 +51,9 @@ def main():
 
     for linha in range(MAPA.height):
         for coluna in range(MAPA.width):
-            if (linha, coluna) in nos:
-                pygame.draw.rect(SCREEN,(255, 100, 20), (coluna * TAMANHO_DO_BLOCO, linha * TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO))
-                if LINHAS_DE_APOIO:
-                    pygame.draw.rect(SCREEN, (255, 100, 20), (coluna * TAMANHO_DO_BLOCO, linha * TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO), 1)
-            else:
-                pygame.draw.rect(SCREEN, getCor(MAPA.mapa[linha][coluna]), (coluna * TAMANHO_DO_BLOCO, linha * TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO))
-                if LINHAS_DE_APOIO:
-                    pygame.draw.rect(SCREEN, (0, 0, 0), (coluna * TAMANHO_DO_BLOCO, linha * TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO), 1)
+            pygame.draw.rect(SCREEN, getCor(MAPA.mapa[linha][coluna]), (coluna * TAMANHO_DO_BLOCO, linha * TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO))
+            if LINHAS_DE_APOIO:
+                pygame.draw.rect(SCREEN, (0, 0, 0), (coluna * TAMANHO_DO_BLOCO, linha * TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO), 1)
 
     
 
@@ -65,6 +62,30 @@ def main():
             if evento.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            elif evento.type == pygame.KEYDOWN:
+            
+
+                if evento.key == pygame.K_SPACE:
+                    no = next(busca)
+                    while no["estado"] != "fim":
+                        no = next(busca)
+                        if no["estado"] == "buscando...":
+                            for i in no["vizinhos"]:
+                                pygame.draw.rect(SCREEN, (255, 0, 255), (i[1] * TAMANHO_DO_BLOCO, i[0] * TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO))
+                                pygame.display.update()
+                                CLOCK.tick(500)
+                        elif no["estado"] == "fim":
+                            for i in no["caminho"]:
+                                
+                                pygame.draw.rect(SCREEN, (255, 215, 0), (i[1] * TAMANHO_DO_BLOCO, i[0] * TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO, TAMANHO_DO_BLOCO))
+                                pygame.display.update()
+                                CLOCK.tick(500)
+
+
+
+                   
+                        
+                        
 
         pygame.display.update()
 

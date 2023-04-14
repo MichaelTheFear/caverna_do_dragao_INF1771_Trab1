@@ -112,7 +112,7 @@ class Mapa():
             row = []
             for j in range(len(lines[i])):
                 row.append(lines[i][j])
-                if lines[i][j] in '0123456789BCDEGHIJKLMNOPQSTUWYZ':
+                if lines[i][j] in '0123456789BCEGHIJKLNOPQSTUWYZ':
                     self.eventos[lines[i][j]] = (i, j)
             self.mapa.append(row)
  
@@ -290,9 +290,18 @@ class AEstrela:
                 while node != None:
                     path.append(node.coord)
                     node = node.parent
-                return path[::-1]
+                yield {
+                    "estado": "fim",
+                    "caminho":path[::-1]
+                    }
             
+            neighbors_coords = [node.coord for node in self.neighbors(currentNode)]
             
+            yield {
+                "estado": "buscando...",
+                "vizinhos": neighbors_coords,
+                "atual": currentNode.coord
+            }
             
             for neighborNode in self.neighbors(currentNode):
                 if neighborNode in closedList:
