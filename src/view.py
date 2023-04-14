@@ -148,10 +148,14 @@ class Caverna_Do_Dragao:
             return (0, 0, 0)
     
     def desenha_quadrado(self, linha:int, coluna:int,cor = None) -> None:
-        
             pygame.draw.rect(self.SCREEN, self.get_cor(MAPA.mapa[linha][coluna]) if cor==None else cor, (coluna * self.TAMANHO_DO_BLOCO, linha * self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO))
             if self.LINHAS_DE_APOIO:
                 pygame.draw.rect(self.SCREEN, (0, 0, 0), (coluna * self.TAMANHO_DO_BLOCO, linha * self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO), 1)
+
+    def desenha_quadrado_animado(self, linha:int, coluna:int,cor = None) -> None:
+        self.desenha_quadrado(linha, coluna, cor=(255, 215, 0))
+        pygame.display.update()
+        self.CLOCK.tick(self.VELOCIDADE_ANIMACAO)
 
     def limpa_mapa(self)  -> None:
         for linha in range(MAPA.height):
@@ -161,12 +165,42 @@ class Caverna_Do_Dragao:
                 else:
                     self.desenha_quadrado(linha, coluna, (7, 232, 240))
         
+        pygame.display.update()
+        self.CLOCK.tick(self.VELOCIDADE_ANIMACAO)
+        
         inicio = self.EVENTOS[self.EVENTO_ATUAL]
         fim = self.EVENTOS[self.PROXIMO_EVENTO]
         self.desenha_quadrado(inicio[0], inicio[1], (209, 240, 7))
         self.desenha_quadrado(fim[0], fim[1], (240, 170, 7))
 
+    def gera_caminho_todo(self) -> None:
+        flag = False
+        while True:
+            try:
+                caminho = self.proximo_caminho()
+                busca = next(caminho) 
+            except StopIteration:
+                flag = True
+            self.limpa_mapa()
+            print(f"este evento: {self.NOMES_EVENTOS[self.EVENTO_ATUAL]} proximo evento: {self.NOMES_EVENTOS[self.PROXIMO_EVENTO]}")
 
+            if flag:
+                break
+            while True:
+                no = next(busca)
+                yield
+                if not self.SEM_ANIMACAO:
+                    if no["estado"] == "buscando...":
+                        for i in no["vizinhos"]:
+                            self.desenha_quadrado_animado(i[0], i[1], cor=(255, 215, 0))
+                    elif no["estado"] == "fim":
+                        for i in no["caminho"]:
+                            self.desenha_quadrado_animado(i[0], i[1], cor=(7, 232, 240))
+                
+                if no["estado"] == "fim":
+                    self.CAMINHO.extend(no["caminho"])
+                    break
+            
     
 
     def proximo_caminho(self) -> None:
@@ -176,6 +210,8 @@ class Caverna_Do_Dragao:
             yield AEstrela().solve(self.EVENTOS[self.EVENTO_ATUAL], self.EVENTOS[self.PROXIMO_EVENTO])
     
     def game_start(self) -> None:
+        caminho_todo:bool = False
+        caminho_todo_gerador = self.gera_caminho_todo()
         while True:
             for evento in pygame.event.get():
                 if evento.type == pygame.QUIT:
@@ -183,39 +219,7 @@ class Caverna_Do_Dragao:
                     sys.exit()
                 elif evento.type == pygame.KEYDOWN:
                     if evento.key == pygame.K_f:
-                        #TODO corrigir este erro
-                        flag = False
-                        while True:
-                            try:
-                                caminho = self.proximo_caminho()
-                                busca = next(caminho) 
-                            except StopIteration:
-                                flag = True
-
-                            self.limpa_mapa()
-                            pygame.display.update()
-                            self.CLOCK.tick(self.VELOCIDADE_ANIMACAO)
-                            print(f"este evento: {self.NOMES_EVENTOS[self.EVENTO_ATUAL]} proximo evento: {self.NOMES_EVENTOS[self.PROXIMO_EVENTO]}")
-                            if flag:
-                                break
-                            while True:
-                                no = next(busca)
-                                if not self.SEM_ANIMACAO:
-                                    if no["estado"] == "buscando...":
-                                        for i in no["vizinhos"]:
-                                            self.desenha_quadrado(i[0], i[1], cor=(255, 0, 255))
-                                            pygame.display.update()
-                                            self.CLOCK.tick(self.VELOCIDADE_ANIMACAO)
-                                    elif no["estado"] == "fim":
-                                        for i in no["caminho"]:
-                                            self.desenha_quadrado(i[0], i[1], cor=(255, 215, 0))
-                                            pygame.display.update()
-                                            self.CLOCK.tick(self.VELOCIDADE_ANIMACAO)
-                                
-                                if no["estado"] == "fim":
-                                    self.CAMINHO.extend(no["caminho"])
-                                    break
-                            
+                        caminho_todo = not caminho_todo
                     
                     if evento.key == pygame.K_SPACE:
                         self.limpa_mapa()
@@ -235,6 +239,12 @@ class Caverna_Do_Dragao:
                                     self.desenha_quadrado(i[0], i[1], cor=(255, 215, 0))
                                     pygame.display.update()
                                     self.CLOCK.tick(self.VELOCIDADE_ANIMACAO)
+            
+            if caminho_todo:
+                try:
+                    next(caminho_todo_gerador)
+                except StopIteration:
+                    caminho_todo = False
                                     
 
 
