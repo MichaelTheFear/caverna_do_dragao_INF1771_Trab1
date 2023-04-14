@@ -107,16 +107,18 @@ def dictToList(d)->list:
 
 
 class Caverna_Do_Dragao:
-    TAMANHO_DO_BLOCO = 8
-    NUMERO_DE_LINHAS = 105
-    NUMERO_DE_COLUNAS = 200
-    LARGURA_DA_TELA = NUMERO_DE_COLUNAS * TAMANHO_DO_BLOCO
-    ALTURA_DA_TELA = NUMERO_DE_LINHAS * TAMANHO_DO_BLOCO
-    LINHAS_DE_APOIO = False
-    EVENTOS = dictToList(MAPA.eventos)
-    PROXIMO_EVENTO = 0
-    EVENTO_ATUAL = -1
-    AESTRELA = AEstrela()
+    VELOCIDADE_ANIMACAO:int = 500 # quanto maior mais rapido
+    TAMANHO_DO_BLOCO:int = 8
+    NUMERO_DE_LINHAS:int = 105
+    NUMERO_DE_COLUNAS:int = 200
+    LARGURA_DA_TELA:int = NUMERO_DE_COLUNAS * TAMANHO_DO_BLOCO
+    ALTURA_DA_TELA:int = NUMERO_DE_LINHAS * TAMANHO_DO_BLOCO
+    LINHAS_DE_APOIO:bool = False
+    EVENTOS:list[tuple[int,int]] = dictToList(MAPA.eventos)
+    PROXIMO_EVENTO:int = 0
+    EVENTO_ATUAL:int = -1
+    AESTRELA:AEstrela = AEstrela()
+    CAMINHO:list[tuple[int,int]] = []
     
 
     def __init__(self):
@@ -144,7 +146,7 @@ class Caverna_Do_Dragao:
         else:
             return (0, 0, 0)
     
-    def desenha_quadrado(self, linha:int, coluna:int) -> None:
+    def desenha_quadrado(self, linha:int, coluna:int,cor:tuple[int,int,int]) -> None:
         pygame.draw.rect(self.SCREEN, self.get_cor(MAPA.mapa[linha][coluna]), (coluna * self.TAMANHO_DO_BLOCO, linha * self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO))
         if self.LINHAS_DE_APOIO:
             pygame.draw.rect(self.SCREEN, (0, 0, 0), (coluna * self.TAMANHO_DO_BLOCO, linha * self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO), 1)
@@ -177,13 +179,13 @@ class Caverna_Do_Dragao:
                                 for i in no["vizinhos"]:
                                     pygame.draw.rect(self.SCREEN, (255, 0, 255), (i[1] * self.TAMANHO_DO_BLOCO, i[0] * self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO))
                                     pygame.display.update()
-                                    self.CLOCK.tick(500)
+                                    self.CLOCK.tick(self.VELOCIDADE_ANIMACAO)
                             elif no["estado"] == "fim":
                                 for i in no["caminho"]:
                                     
                                     pygame.draw.rect(self.SCREEN, (255, 215, 0), (i[1] * self.TAMANHO_DO_BLOCO, i[0] * self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO))
                                     pygame.display.update()
-                                    self.CLOCK.tick(500)
+                                    self.CLOCK.tick(self.VELOCIDADE_ANIMACAO)
 
 
 
