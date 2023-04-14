@@ -108,7 +108,7 @@ def dictToList(d)->list:
 
 class Caverna_Do_Dragao:
     VELOCIDADE_ANIMACAO:int = 1000000 # quanto maior mais rapido
-    SEM_ANIMACAO:bool = True
+    SEM_ANIMACAO:bool = False
     TAMANHO_DO_BLOCO:int = 8
     NUMERO_DE_LINHAS:int = 105
     NUMERO_DE_COLUNAS:int = 204
@@ -173,6 +173,8 @@ class Caverna_Do_Dragao:
         self.desenha_quadrado(inicio[0], inicio[1], (209, 240, 7))
         self.desenha_quadrado(fim[0], fim[1], (240, 170, 7))
 
+    
+
     def gera_caminho_todo(self) -> None:
         flag = False
         while True:
@@ -200,7 +202,15 @@ class Caverna_Do_Dragao:
                 if no["estado"] == "fim":
                     self.CAMINHO.extend(no["caminho"])
                     break
-            
+
+
+    def gera_caminho_todo_de_uma_vez(self) -> None:
+        caminhos = AEstrela().solve_todos_os_caminhos(self.EVENTOS)
+        for caminho in caminhos:
+            self.desenha_quadrado(caminho[0], caminho[0], cor=(209, 240, 7))
+        
+        pygame.display.update()
+        self.CLOCK.tick(self.VELOCIDADE_ANIMACAO)
     
 
     def proximo_caminho(self) -> None:
@@ -212,6 +222,7 @@ class Caverna_Do_Dragao:
     def game_start(self) -> None:
         caminho_todo:bool = False
         caminho_todo_gerador = self.gera_caminho_todo()
+        
         while True:
             for evento in pygame.event.get():
                 if evento.type == pygame.QUIT:
@@ -220,6 +231,9 @@ class Caverna_Do_Dragao:
                 elif evento.type == pygame.KEYDOWN:
                     if evento.key == pygame.K_f:
                         caminho_todo = not caminho_todo
+                    
+                    if evento.key == pygame.K_x:
+                        self.gera_caminho_todo_de_uma_vez()
                     
                     if evento.key == pygame.K_SPACE:
                         self.limpa_mapa()

@@ -254,6 +254,19 @@ class AEstrela:
                 result.append(candNode)
         return result
     
+    def solve_todos_os_caminhos(self, nodes:list[tuple[int,int]]) -> list[list[tuple[int,int]]]:
+        res = []
+        for index in range(len(nodes) - 1):
+            current = self.solve(nodes[index], nodes[index+1])
+            print(f"current: {current}")
+            while True:
+                try:
+                    current_path = next(current)
+                    if current_path["estado"] == "fim":
+                        res.extend(current_path["caminho"])
+                except:
+                    break
+    
     def solve(self, start:tuple[int,int], goal:tuple[int,int]) -> list[tuple[int,int]]:
         #Creating start and goal nodes
         startNode = Node(start, None)
