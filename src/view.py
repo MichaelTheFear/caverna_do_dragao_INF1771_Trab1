@@ -133,17 +133,17 @@ class Caverna_Do_Dragao:
         
     def get_cor(self, value: str) -> tuple:
         if value == '.':
-            return (222, 219, 133)
+            return (186, 178, 127)
         elif value == 'F':
-            return (50, 168, 82)
+            return (47, 64, 29)
         elif value == 'R':
-            return (200, 200, 200)
+            return (105, 104, 102)
         elif value == 'D':
-            return (255, 0, 0)
+            return (82, 32, 32)
         elif value == 'A':
-            return (0, 0, 255)
+            return (32, 33, 82)
         elif value == 'M':
-            return (139, 69, 19)
+            return (82, 57, 32)
         else:
             return (0, 0, 0)
     
