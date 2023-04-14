@@ -256,7 +256,6 @@ class AEstrela:
     
     def solve(self, start:tuple[int,int], goal:tuple[int,int]) -> list[tuple[int,int]]:
         #Creating start and goal nodes
-        print(start, goal)
         startNode = Node(start, None)
         goalNode = Node(goal, None)
 
@@ -284,7 +283,6 @@ class AEstrela:
 
             #Found the goal
             if currentNode == goalNode:
-                print("Found the goal")
                 path=[]
                 node = currentNode
                 while node != None:
@@ -294,6 +292,7 @@ class AEstrela:
                     "estado": "fim",
                     "caminho":path[::-1]
                     }
+                break
             
             neighbors_coords = [node.coord for node in self.neighbors(currentNode)]
             

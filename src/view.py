@@ -107,10 +107,11 @@ def dictToList(d)->list:
 
 
 class Caverna_Do_Dragao:
-    VELOCIDADE_ANIMACAO:int = 500 # quanto maior mais rapido
+    VELOCIDADE_ANIMACAO:int = 1000000 # quanto maior mais rapido
+    SEM_ANIMACAO:bool = True
     TAMANHO_DO_BLOCO:int = 8
     NUMERO_DE_LINHAS:int = 105
-    NUMERO_DE_COLUNAS:int = 200
+    NUMERO_DE_COLUNAS:int = 204
     LARGURA_DA_TELA:int = NUMERO_DE_COLUNAS * TAMANHO_DO_BLOCO
     ALTURA_DA_TELA:int = NUMERO_DE_LINHAS * TAMANHO_DO_BLOCO
     LINHAS_DE_APOIO:bool = False
@@ -119,7 +120,7 @@ class Caverna_Do_Dragao:
     EVENTO_ATUAL:int = -1
     AESTRELA:AEstrela = AEstrela()
     CAMINHO:list[tuple[int,int]] = []
-    
+    NOMES_EVENTOS = "0123456789BCEGHIJKLNOPQSTUWYZ"
 
     def __init__(self):
         pygame.init()
@@ -146,20 +147,33 @@ class Caverna_Do_Dragao:
         else:
             return (0, 0, 0)
     
-    def desenha_quadrado(self, linha:int, coluna:int,cor:tuple[int,int,int]) -> None:
-        pygame.draw.rect(self.SCREEN, self.get_cor(MAPA.mapa[linha][coluna]), (coluna * self.TAMANHO_DO_BLOCO, linha * self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO))
-        if self.LINHAS_DE_APOIO:
-            pygame.draw.rect(self.SCREEN, (0, 0, 0), (coluna * self.TAMANHO_DO_BLOCO, linha * self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO), 1)
+    def desenha_quadrado(self, linha:int, coluna:int,cor = None) -> None:
+        
+            pygame.draw.rect(self.SCREEN, self.get_cor(MAPA.mapa[linha][coluna]) if cor==None else cor, (coluna * self.TAMANHO_DO_BLOCO, linha * self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO))
+            if self.LINHAS_DE_APOIO:
+                pygame.draw.rect(self.SCREEN, (0, 0, 0), (coluna * self.TAMANHO_DO_BLOCO, linha * self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO), 1)
 
     def limpa_mapa(self)  -> None:
         for linha in range(MAPA.height):
             for coluna in range(MAPA.width):
-                self.desenha_quadrado(linha, coluna)
+                if (linha,coluna) not in self.CAMINHO:
+                    self.desenha_quadrado(linha, coluna)
+                else:
+                    self.desenha_quadrado(linha, coluna, (7, 232, 240))
+        
+        inicio = self.EVENTOS[self.EVENTO_ATUAL]
+        fim = self.EVENTOS[self.PROXIMO_EVENTO]
+        self.desenha_quadrado(inicio[0], inicio[1], (209, 240, 7))
+        self.desenha_quadrado(fim[0], fim[1], (240, 170, 7))
+
+
+    
 
     def proximo_caminho(self) -> None:
         self.EVENTO_ATUAL += 1
         self.PROXIMO_EVENTO += 1
-        yield AEstrela().solve(self.EVENTOS[self.EVENTO_ATUAL], self.EVENTOS[self.PROXIMO_EVENTO])
+        if self.PROXIMO_EVENTO != len(self.EVENTOS) - 1:
+            yield AEstrela().solve(self.EVENTOS[self.EVENTO_ATUAL], self.EVENTOS[self.PROXIMO_EVENTO])
     
     def game_start(self) -> None:
         while True:
@@ -168,24 +182,60 @@ class Caverna_Do_Dragao:
                     pygame.quit()
                     sys.exit()
                 elif evento.type == pygame.KEYDOWN:
-                    self.limpa_mapa()
-                    caminho = self.proximo_caminho()
-                    busca = next(caminho)
+                    if evento.key == pygame.K_f:
+                        #TODO corrigir este erro
+                        flag = False
+                        while True:
+                            try:
+                                caminho = self.proximo_caminho()
+                                busca = next(caminho) 
+                            except StopIteration:
+                                flag = True
+
+                            self.limpa_mapa()
+                            pygame.display.update()
+                            self.CLOCK.tick(self.VELOCIDADE_ANIMACAO)
+                            print(f"este evento: {self.NOMES_EVENTOS[self.EVENTO_ATUAL]} proximo evento: {self.NOMES_EVENTOS[self.PROXIMO_EVENTO]}")
+                            if flag:
+                                break
+                            while True:
+                                no = next(busca)
+                                if not self.SEM_ANIMACAO:
+                                    if no["estado"] == "buscando...":
+                                        for i in no["vizinhos"]:
+                                            self.desenha_quadrado(i[0], i[1], cor=(255, 0, 255))
+                                            pygame.display.update()
+                                            self.CLOCK.tick(self.VELOCIDADE_ANIMACAO)
+                                    elif no["estado"] == "fim":
+                                        for i in no["caminho"]:
+                                            self.desenha_quadrado(i[0], i[1], cor=(255, 215, 0))
+                                            pygame.display.update()
+                                            self.CLOCK.tick(self.VELOCIDADE_ANIMACAO)
+                                
+                                if no["estado"] == "fim":
+                                    self.CAMINHO.extend(no["caminho"])
+                                    break
+                            
+                    
                     if evento.key == pygame.K_SPACE:
+                        self.limpa_mapa()
+                        caminho = self.proximo_caminho()
+                        busca = next(caminho)
                         no = next(busca)
                         while no["estado"] != "fim":
                             no = next(busca)
                             if no["estado"] == "buscando...":
                                 for i in no["vizinhos"]:
-                                    pygame.draw.rect(self.SCREEN, (255, 0, 255), (i[1] * self.TAMANHO_DO_BLOCO, i[0] * self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO))
+                                    self.desenha_quadrado(i[0], i[1], cor=(255, 0, 255))
                                     pygame.display.update()
                                     self.CLOCK.tick(self.VELOCIDADE_ANIMACAO)
                             elif no["estado"] == "fim":
+                                self.CAMINHO.extend(no["caminho"])
                                 for i in no["caminho"]:
-                                    
-                                    pygame.draw.rect(self.SCREEN, (255, 215, 0), (i[1] * self.TAMANHO_DO_BLOCO, i[0] * self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO, self.TAMANHO_DO_BLOCO))
+                                    self.desenha_quadrado(i[0], i[1], cor=(255, 215, 0))
                                     pygame.display.update()
                                     self.CLOCK.tick(self.VELOCIDADE_ANIMACAO)
+                                    
 
 
 
