@@ -190,7 +190,6 @@ class Caverna_Do_Dragao:
                 break
             while True:
                 no = next(busca)
-                yield
                 if not self.SEM_ANIMACAO:
                     if no["estado"] == "buscando...":
                         for i in no["vizinhos"]:
@@ -202,6 +201,10 @@ class Caverna_Do_Dragao:
                 if no["estado"] == "fim":
                     self.CAMINHO.extend(no["caminho"])
                     break
+                yield
+
+        self.limpa_mapa()
+                    
 
 
     def gera_caminho_todo_de_uma_vez(self) -> None:
@@ -244,16 +247,11 @@ class Caverna_Do_Dragao:
                             no = next(busca)
                             if no["estado"] == "buscando...":
                                 for i in no["vizinhos"]:
-                                    self.desenha_quadrado(i[0], i[1], cor=(255, 0, 255))
-                                    pygame.display.update()
-                                    self.CLOCK.tick(self.VELOCIDADE_ANIMACAO)
+                                    self.desenha_quadrado_animado(i[0], i[1], cor=(255, 215, 0))
                             elif no["estado"] == "fim":
                                 self.CAMINHO.extend(no["caminho"])
                                 for i in no["caminho"]:
-                                    self.desenha_quadrado(i[0], i[1], cor=(255, 215, 0))
-                                    pygame.display.update()
-                                    self.CLOCK.tick(self.VELOCIDADE_ANIMACAO)
-            
+                                    self.desenha_quadrado_animado(i[0], i[1], cor=(7, 232, 240))
             if caminho_todo:
                 try:
                     next(caminho_todo_gerador)
