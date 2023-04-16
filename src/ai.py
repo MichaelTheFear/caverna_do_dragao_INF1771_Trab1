@@ -50,4 +50,31 @@ class AlgoritimosAI():
             tempo += self.personagens[personagem][0]
         return self.dificuldade[fase] // tempo
 
+
+    """
+    Função Simulated-Annealing(Problema, Escalonamento) retorna um estado
+    que é o máximo local
+        Inicio
+        EstadoAtual ← Criar-Nó(Problema[EstadoInicial])
+        loop do
+        t = t + 1
+        T ← Escalonamento[t]
+        Se T = 0 então retorna EstadoAtual
+        Próximo ← seleciona um sucessor do EstadoAtual aleatoriamente
+        ΔE ← Próximo[Valor] – EstadoAtual[Valor]
+        se ΔE > 0 então EstadoAtual ← Próximo
+        senão EstadoAtual ← Próximo somente com probabilidade e
+        ΔE/T
+        fim 
+    """
+    def annealing(self, personagens:list[str], fases: list[str]) -> int:
+        estado_atual = 0
+        t = 0
+        while True:
+            T = fases[t]
+
+
+
+
+            t += 1
         

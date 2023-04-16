@@ -238,6 +238,8 @@ class CoordList():
 
 
 class AEstrela:
+    total_de_passos = 0
+
     def neighbors(self, node:Node) -> list[Node]:
         row, col = node.coord
         candidates = [
@@ -266,6 +268,7 @@ class AEstrela:
                         res.extend(current_path["caminho"])
                 except:
                     break
+        return res
     
     def solve(self, start:tuple[int,int], goal:tuple[int,int]) -> list[tuple[int,int]]:
         #Creating start and goal nodes
@@ -309,6 +312,8 @@ class AEstrela:
             
             neighbors_coords = [node.coord for node in self.neighbors(currentNode)]
             
+            self.total_de_passos += 1
+
             yield {
                 "estado": "buscando...",
                 "vizinhos": neighbors_coords,
@@ -339,5 +344,7 @@ class AEstrela:
             
                 
                 
+
+
 
 
