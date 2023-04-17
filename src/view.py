@@ -17,7 +17,7 @@ def dictToList(d)->list:
 
 class Caverna_Do_Dragao:
     VELOCIDADE_ANIMACAO:int = 1000000 # quanto maior mais rapido
-    SEM_ANIMACAO:bool = False
+    SEM_ANIMACAO:bool = True
     TAMANHO_DO_BLOCO:int = 8
     NUMERO_DE_LINHAS:int = 105
     NUMERO_DE_COLUNAS:int = 204
@@ -109,6 +109,7 @@ class Caverna_Do_Dragao:
                             self.desenha_quadrado_animado(i[0], i[1], cor=(7, 232, 240))
                 
                 if no["estado"] == "fim":
+                    print(no["caminho"])
                     self.CAMINHO.extend(no["caminho"])
                     break
                 yield

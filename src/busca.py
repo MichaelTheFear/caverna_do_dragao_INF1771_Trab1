@@ -114,6 +114,8 @@ class Mapa():
                 row.append(lines[i][j])
                 if lines[i][j] in '0123456789BCEGHIJKLNOPQSTUWYZ':
                     self.eventos[lines[i][j]] = (i, j)
+                    if lines[i][j] == "Z":
+                        print(f"Z:{i,j}")
             self.mapa.append(row)
  
     def getDificuldade(evento: str) -> int:
