@@ -1,10 +1,12 @@
-import itertools
+from itertools import combinations
 from random import randint, random
 from math import exp
+from json import dumps
 
 class AlgoritimosAI():
-    ANNEALING_FATOR_PARADA = 75 # em porcentagem
-    ANNEALING_EARLY_STOP = 25 # em porcentagem
+    ANNEALING_FATOR_PARADA = 5 # em porcentagem
+    ANNEALING_EARLY_STOP = 1 # em porcentagem
+    FASES = "123456789BCEGHIJKLNOPQSTUWYZ"
 
     personagens = {
         
@@ -56,19 +58,33 @@ class AlgoritimosAI():
         return self.dificuldade[fase] // tempo
 
 
-    def calcula_tempo_fase(self,personagens,dificulade):
+    def calcula_tempo_fase(self,personagens:list[str],dificulade:int):
         somatorio = 0
         for personagem in personagens:
-            somatorio += personagem[0]
+            somatorio += self.personagens[personagem][0]
         return dificulade / somatorio
 
-    def permutacao(self,personagens:list[str]) -> list[list[str]]:
-        return list(itertools.permutations(personagens))
+    def combincacao(self,personagens:list[str]) -> list[list[str]]:
+        personagens_validos = []
+        res = []
+        for personagem in personagens:
+            if self.personagens[personagem][1] != 11:
+                personagens_validos.append(personagem)
+
+        for i in range(1, len(personagens_validos)+1):
+            for comb in combinations(personagens_validos, i):
+                res.append(list(comb))
+        
+        return res
+        
 
     def resolve_por_anneling(self,personagens:list[str] , fases:list[str]) -> dict[str,list[str]]:
         solucao = {}
         for fase in fases:
-            solucao[fase] = self.annealing(self.permutacao(personagens),self.dificuldade[fase])
+            solucao[fase] = self.annealing(self.combincacao(personagens),self.dificuldade[fase])
+            for personagem in solucao[fase][0]:
+                self.personagens[personagem][1] += 1
+            print(solucao)
         return solucao
 
     def escolhe_estado(self, estados:list[list[float]]) -> list[float]:
@@ -79,24 +95,34 @@ class AlgoritimosAI():
 
     def annealing(self, estados:list[list[float]], coeficiente_fase:int) -> int:
         melhor_estado = estados[0]
-        total_max_de_iteracoes = len(estados) * 100/ self.ANNEALING_FATOR_PARADA
+        t_melhor_estado = self.calcula_tempo_fase(melhor_estado,coeficiente_fase)
+        total_max_de_iteracoes = len(estados) * self.ANNEALING_FATOR_PARADA // 100
+        total_max_de_iteracoes_sem_mudanca = len(estados) * self.ANNEALING_EARLY_STOP // 100
         i = 0
         melhor_estado_mudado = 0
         while i < total_max_de_iteracoes:
+            i += 1
             estado = self.escolhe_estado(estados)
-            t_melhor_estado = self.calcula_tempo_fase(melhor_estado,coeficiente_fase)
             t_estado_atual = self.calcula_tempo_fase(estado,coeficiente_fase)
             delta_estado = t_estado_atual - t_melhor_estado
-            if t_estado_atual < t_melhor_estado or random() > self.prob(delta_estado,0):
+            if t_estado_atual < t_melhor_estado or random() > self.boltzman(delta_estado,i):
+                t_melhor_estado = t_estado_atual
                 melhor_estado = estado
                 melhor_estado_mudado = 0
             else:
                 melhor_estado_mudado += 1
-                if melhor_estado_mudado > total_max_de_iteracoes * self.ANNEALING_EARLY_STOP / 100:
-                    return melhor_estado
-
-            i += 1
-        
-        return melhor_estado
+                if i >= total_max_de_iteracoes  or melhor_estado_mudado >= total_max_de_iteracoes_sem_mudanca:
+                    return melhor_estado , t_melhor_estado
 
         
+        return melhor_estado, t_melhor_estado
+        
+    def test(self):
+        resultado = self.resolve_por_anneling(self.personagens.keys(),self.FASES)
+        print(dumps(resultado,indent=4))
+        total = 0
+        for fase in resultado:
+            total += resultado[fase][1]
+        print(f"total ecnontrado {total}")
+
+AlgoritimosAI().test()
