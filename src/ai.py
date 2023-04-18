@@ -1,4 +1,10 @@
+import itertools
+from random import randint, random
+from math import exp
+
 class AlgoritimosAI():
+    ANNEALING_FATOR_PARADA = 75 # em porcentagem
+    ANNEALING_EARLY_STOP = 25 # em porcentagem
 
     personagens = {
         
@@ -42,7 +48,6 @@ class AlgoritimosAI():
         'Z': 260
     }
 
-   
 
     def calcula_tempo(self, personagens:list[str], fase: str) -> int:
         tempo = 0
@@ -51,30 +56,47 @@ class AlgoritimosAI():
         return self.dificuldade[fase] // tempo
 
 
-    """
-    Função Simulated-Annealing(Problema, Escalonamento) retorna um estado
-    que é o máximo local
-        Inicio
-        EstadoAtual ← Criar-Nó(Problema[EstadoInicial])
-        loop do
-        t = t + 1
-        T ← Escalonamento[t]
-        Se T = 0 então retorna EstadoAtual
-        Próximo ← seleciona um sucessor do EstadoAtual aleatoriamente
-        ΔE ← Próximo[Valor] – EstadoAtual[Valor]
-        se ΔE > 0 então EstadoAtual ← Próximo
-        senão EstadoAtual ← Próximo somente com probabilidade e
-        ΔE/T
-        fim 
-    """
-    def annealing(self, personagens:list[str], fases: list[str]) -> int:
-        estado_atual = 0
-        t = 0
-        while True:
-            T = fases[t]
+    def calcula_tempo_fase(self,personagens,dificulade):
+        somatorio = 0
+        for personagem in personagens:
+            somatorio += personagem[0]
+        return dificulade / somatorio
 
+    def permutacao(self,personagens:list[str]) -> list[list[str]]:
+        return list(itertools.permutations(personagens))
 
+    def resolve_por_anneling(self,personagens:list[str] , fases:list[str]) -> dict[str,list[str]]:
+        solucao = {}
+        for fase in fases:
+            solucao[fase] = self.annealing(self.permutacao(personagens),self.dificuldade[fase])
+        return solucao
 
+    def escolhe_estado(self, estados:list[list[float]]) -> list[float]:
+        return estados.pop(randint(0,len(estados)-1))
 
-            t += 1
+    def boltzman(self, delta:int, tempo:int) -> float:
+        return exp(-delta/tempo)
+
+    def annealing(self, estados:list[list[float]], coeficiente_fase:int) -> int:
+        melhor_estado = estados[0]
+        total_max_de_iteracoes = len(estados) * 100/ self.ANNEALING_FATOR_PARADA
+        i = 0
+        melhor_estado_mudado = 0
+        while i < total_max_de_iteracoes:
+            estado = self.escolhe_estado(estados)
+            t_melhor_estado = self.calcula_tempo_fase(melhor_estado,coeficiente_fase)
+            t_estado_atual = self.calcula_tempo_fase(estado,coeficiente_fase)
+            delta_estado = t_estado_atual - t_melhor_estado
+            if t_estado_atual < t_melhor_estado or random() > self.prob(delta_estado,0):
+                melhor_estado = estado
+                melhor_estado_mudado = 0
+            else:
+                melhor_estado_mudado += 1
+                if melhor_estado_mudado > total_max_de_iteracoes * self.ANNEALING_EARLY_STOP / 100:
+                    return melhor_estado
+
+            i += 1
+        
+        return melhor_estado
+
         

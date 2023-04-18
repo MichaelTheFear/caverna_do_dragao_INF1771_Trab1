@@ -17,8 +17,8 @@ def dictToList(d)->list:
 
 class Caverna_Do_Dragao:
     VELOCIDADE_ANIMACAO:int = 1000000 # quanto maior mais rapido
-    SEM_ANIMACAO:bool = True
-    TAMANHO_DO_BLOCO:int = 8
+    SEM_ANIMACAO:bool = False
+    TAMANHO_DO_BLOCO:int = 6
     NUMERO_DE_LINHAS:int = 105
     NUMERO_DE_COLUNAS:int = 204
     LARGURA_DA_TELA:int = NUMERO_DE_COLUNAS * TAMANHO_DO_BLOCO
