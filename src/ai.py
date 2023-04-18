@@ -92,9 +92,7 @@ class AlgoritimosAI():
     def escolhe_estado(self, estados:list[list[float]],coeficente_fase:int) -> list[float]:
         #heuristica de estados aumentar a probabilidade de escolher um estado com indice menor se o coeficiente for menor
         coeficiente = coeficente_fase / self.MAX_COEFICIENTE
-        index = int(len(estados)) 
-
-
+        index = int(len(estados)*coeficiente*random()) + 1 
         return estados.pop(index)
 
     def boltzman(self, delta:int, tempo:int) -> float:
