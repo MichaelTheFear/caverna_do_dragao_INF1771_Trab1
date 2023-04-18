@@ -49,6 +49,9 @@ class AlgoritimosAI():
         'Y': 250,
         'Z': 260
     }
+    MIN_COEFICIENTE = min(dificuldade.values())
+    MAX_COEFICIENTE = max(dificuldade.values())
+
 
 
     def calcula_tempo(self, personagens:list[str], fase: str) -> int:
@@ -84,11 +87,15 @@ class AlgoritimosAI():
             solucao[fase] = self.annealing(self.combincacao(personagens),self.dificuldade[fase])
             for personagem in solucao[fase][0]:
                 self.personagens[personagem][1] += 1
-            print(solucao)
         return solucao
 
-    def escolhe_estado(self, estados:list[list[float]]) -> list[float]:
-        return estados.pop(randint(0,len(estados)-1))
+    def escolhe_estado(self, estados:list[list[float]],coeficente_fase:int) -> list[float]:
+        #heuristica de estados aumentar a probabilidade de escolher um estado com indice menor se o coeficiente for menor
+        coeficiente = coeficente_fase / self.MAX_COEFICIENTE
+        index = int(len(estados)) 
+
+
+        return estados.pop(index)
 
     def boltzman(self, delta:int, tempo:int) -> float:
         return exp(-delta/tempo)
@@ -102,7 +109,7 @@ class AlgoritimosAI():
         melhor_estado_mudado = 0
         while i < total_max_de_iteracoes:
             i += 1
-            estado = self.escolhe_estado(estados)
+            estado = self.escolhe_estado(estados, coeficiente_fase)
             t_estado_atual = self.calcula_tempo_fase(estado,coeficiente_fase)
             delta_estado = t_estado_atual - t_melhor_estado
             if t_estado_atual < t_melhor_estado or random() > self.boltzman(delta_estado,i):
@@ -120,6 +127,7 @@ class AlgoritimosAI():
     def test(self):
         resultado = self.resolve_por_anneling(self.personagens.keys(),self.FASES)
         print(dumps(resultado,indent=4))
+        print(dumps(self.personagens,indent=4))
         total = 0
         for fase in resultado:
             total += resultado[fase][1]
