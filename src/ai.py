@@ -5,13 +5,12 @@ from math import exp
 from json import dumps
 
 class AlgoritimosAI():
-    ANNEALING_FATOR_PARADA = 25 
-    ANNEALING_EARLY_STOP = 50 
+    TOTAL_DE_ITERACOES_ANNEALING = 1e4
+    ANNEALING_FATOR_PARADA = TOTAL_DE_ITERACOES_ANNEALING // 25 
+    ANNEALING_EARLY_STOP = TOTAL_DE_ITERACOES_ANNEALING // 10
     FASES = "0123456789BCEGHIJKLNOPQSTUWYZ" # tamanho fases
     PERSONAGENS = ['Hank', 'Diana', 'Sheila', 'Presto', 'Bob', 'Eric']
     TAMANHO_FASES = len(FASES)
-
-    TOTAL_DE_ITERACOES_ANNEALING = 10000
 
     personagens = {
         'Hank': [1.5, 11],
@@ -131,6 +130,7 @@ class AlgoritimosAI():
     def boltzman(self, delta:int, tempo:int) -> float:
         return exp(-delta/tempo)
 
+
     def pega_personagen_aleatorio(self):
         if not self.sem_personagem_valido():
             raise Exception("Não tem personagem valido")
@@ -248,14 +248,16 @@ class AlgoritimosAI():
                 continue
 
         fitness_solucao = self.fitness(solucao)
-        total_max_de_iteracoes = self.TOTAL_DE_ITERACOES_ANNEALING // self.ANNEALING_FATOR_PARADA 
-        total_max_de_iteracoes_sem_mudanca = self.TOTAL_DE_ITERACOES_ANNEALING // self.ANNEALING_EARLY_STOP 
+        total_max_de_iteracoes = self.ANNEALING_FATOR_PARADA 
+        total_max_de_iteracoes_sem_mudanca = self.ANNEALING_EARLY_STOP 
         i = 0
         melhor_estado_mudado = 0
         temperatura = 1000
+        T = temperatura / 1
+        delta_estado = 0
         while i < total_max_de_iteracoes:
             try:
-                if random() < 0.5:
+                if random() < self.boltzman(delta_estado,T):
                     nova_solucao = self.gera_vizinhanca(solucao)
                 else:
                     nova_solucao = self.gera_solucao_valida_aleatoria()
@@ -281,29 +283,14 @@ class AlgoritimosAI():
         i = 0
         min_solucao = 2000.00
         solucao_final = {}
-        while i < 100:
+        while True:
             solucao = self.resolve_por_anneling()
             tempo = self.calcula_tempo_solucao(solucao)
             if tempo < min_solucao:
                 min_solucao = tempo
                 solucao_final = solucao
-            i+=1
-
-        vezes_uso = {
-        'Hank': 0,
-        'Diana': 0,
-        'Sheila': 0,
-        'Presto': 0,
-        'Bob': 0,
-        'Eric': 0
-        }
-
-        for fase in solucao_final:
-            for personagem in solucao_final[fase]:
-                vezes_uso[personagem] += 1
-
-        self.print_dict(solucao_final)
-        self.print_dict(vezes_uso)
-        print(f"Tempo: {min_solucao}")
+                self.print_dict(solucao_final)
+                print(f"Tempo: {min_solucao}")
+            
 
 AlgoritimosAI().test()
