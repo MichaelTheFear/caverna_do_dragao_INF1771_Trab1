@@ -104,13 +104,15 @@ class Mapa():
             lines = file.readlines()
         
         self.height = len(lines)
-        self.width = max(len(line) for line in lines)
+        self.width = max(len(line) for line in lines) - 1
 
         self.mapa = []
         self.eventos = {}
         for i in range(self.height):
             row = []
             for j in range(len(lines[i])):
+                if lines[i][j] == '\n':
+                    continue
                 row.append(lines[i][j])
                 if lines[i][j] in '0123456789BCEGHIJKLNOPQSTUWYZ':
                     self.eventos[lines[i][j]] = (i, j)
@@ -344,9 +346,4 @@ class AEstrela:
                 neighborNode.f = neighborNode.g + neighborNode.h
 
             
-                
-                
-
-
-
-
+print("Linhas: %d\nColunas: %d" % (MAPA.height, MAPA.width))

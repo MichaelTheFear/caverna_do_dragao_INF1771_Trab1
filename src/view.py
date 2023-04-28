@@ -19,11 +19,11 @@ class Caverna_Do_Dragao:
     VELOCIDADE_ANIMACAO:int = 1000000 # quanto maior mais rapido
     SEM_ANIMACAO:bool = False
     TAMANHO_DO_BLOCO:int = 6
-    NUMERO_DE_LINHAS:int = 105
-    NUMERO_DE_COLUNAS:int = 204
+    NUMERO_DE_LINHAS:int = MAPA.height + 2
+    NUMERO_DE_COLUNAS:int = MAPA.width +2
     LARGURA_DA_TELA:int = NUMERO_DE_COLUNAS * TAMANHO_DO_BLOCO
     ALTURA_DA_TELA:int = NUMERO_DE_LINHAS * TAMANHO_DO_BLOCO
-    LINHAS_DE_APOIO:bool = False
+    LINHAS_DE_APOIO:bool = True
     EVENTOS:list[tuple[int,int]] = dictToList(MAPA.eventos)
     PROXIMO_EVENTO:int = 0
     EVENTO_ATUAL:int = -1
@@ -35,7 +35,7 @@ class Caverna_Do_Dragao:
         pygame.init()
         self.SCREEN = pygame.display.set_mode((self.LARGURA_DA_TELA, self.ALTURA_DA_TELA))
         self.CLOCK = pygame.time.Clock()
-        self.SCREEN.fill((0, 0, 0))
+        self.SCREEN.fill((255, 255, 255))
         self.limpa_mapa()
 
 
