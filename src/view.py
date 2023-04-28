@@ -16,14 +16,14 @@ def dictToList(d)->list:
 
 
 class Caverna_Do_Dragao:
-    VELOCIDADE_ANIMACAO:int = 1000000 # quanto maior mais rapido
+    VELOCIDADE_ANIMACAO:int = 1e10 # quanto maior mais rapido
     SEM_ANIMACAO:bool = False
     TAMANHO_DO_BLOCO:int = 6
     NUMERO_DE_LINHAS:int = MAPA.height + 2
     NUMERO_DE_COLUNAS:int = MAPA.width +2
     LARGURA_DA_TELA:int = NUMERO_DE_COLUNAS * TAMANHO_DO_BLOCO
     ALTURA_DA_TELA:int = NUMERO_DE_LINHAS * TAMANHO_DO_BLOCO
-    LINHAS_DE_APOIO:bool = True
+    LINHAS_DE_APOIO:bool = False
     EVENTOS:list[tuple[int,int]] = dictToList(MAPA.eventos)
     PROXIMO_EVENTO:int = 0
     EVENTO_ATUAL:int = -1
@@ -37,6 +37,7 @@ class Caverna_Do_Dragao:
         self.CLOCK = pygame.time.Clock()
         self.SCREEN.fill((255, 255, 255))
         self.limpa_mapa()
+        self.custoAEstrela = 0
 
 
         
@@ -137,6 +138,9 @@ class Caverna_Do_Dragao:
         self.EVENTO_ATUAL += 1
         self.PROXIMO_EVENTO += 1
         if self.PROXIMO_EVENTO != len(self.EVENTOS) - 1:
+            '''caminho = self.AESTRELA.solve(self.EVENTOS[self.EVENTO_ATUAL], self.EVENTOS[self.PROXIMO_EVENTO])
+            for coord in caminho:
+                self.custoAEstrela += MAPA.getValor(coord)'''
             yield self.AESTRELA.solve(self.EVENTOS[self.EVENTO_ATUAL], self.EVENTOS[self.PROXIMO_EVENTO])
     
     def game_start(self) -> None:
@@ -152,6 +156,7 @@ class Caverna_Do_Dragao:
                     if evento.key == pygame.K_f:
                         caminho_todo = not caminho_todo
                         comeco = time.time()
+                        print(MAPA.aStarCost)
                     
                     if evento.key == pygame.K_x:
                         self.gera_caminho_todo_de_uma_vez()
@@ -170,6 +175,7 @@ class Caverna_Do_Dragao:
                                 self.CAMINHO.extend(no["caminho"])
                                 for i in no["caminho"]:
                                     self.desenha_quadrado_animado(i[0], i[1], cor=(7, 232, 240))
+                        print(MAPA.aStarCost)
             if caminho_todo:
                 try:
                     next(caminho_todo_gerador)
@@ -177,13 +183,6 @@ class Caverna_Do_Dragao:
                     print(f"Caminho desenhando {time.time() - comeco} segundos")
                     caminho_todo = False
                                     
-
-
-
-                    
-                            
-                            
-
             pygame.display.update()
 
 

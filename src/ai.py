@@ -1,16 +1,20 @@
 from copy import deepcopy
 from itertools import combinations
-from random import choice, randint, random
+from random import choice, randint, random, seed
 from math import exp
 from json import dumps
+
+seed()
 
 class AlgoritimosAI():
     TOTAL_DE_ITERACOES_ANNEALING = 1e4
     ANNEALING_FATOR_PARADA = TOTAL_DE_ITERACOES_ANNEALING // 25 
     ANNEALING_EARLY_STOP = TOTAL_DE_ITERACOES_ANNEALING // 10
-    FASES = "0123456789BCEGHIJKLNOPQSTUWYZ" # tamanho fases
+    FASES = "123456789BCEGHIJKLNOPQSTUWYZ" # tamanho fases
     PERSONAGENS = ['Hank', 'Diana', 'Sheila', 'Presto', 'Bob', 'Eric']
     TAMANHO_FASES = len(FASES)
+    min_fitness = 2000.00
+    min_solucao = {}
 
     personagens = {
         'Hank': [1.5, 11],
@@ -22,7 +26,6 @@ class AlgoritimosAI():
     }
     
     dificuldade = {
-        '0': 1,
         '1': 10,
         '2': 20,
         '3': 30,
@@ -92,7 +95,7 @@ class AlgoritimosAI():
         total_max_de_iteracoes = len(estados) * self.ANNEALING_FATOR_PARADA // 100
         total_max_de_iteracoes_sem_mudanca = len(estados) * self.ANNEALING_EARLY_STOP // 100
         i = 0
-        melhor_estado_mudado = 0
+        estado_mudado = 0
         while i < total_max_de_iteracoes:
             i += 1
             estado = self.escolhe_estado(estados, coeficiente_fase)
@@ -101,10 +104,10 @@ class AlgoritimosAI():
             if t_estado_atual < t_melhor_estado or random() > self.boltzman(delta_estado,i):
                 t_melhor_estado = t_estado_atual
                 melhor_estado = estado
-                melhor_estado_mudado = 0
+                estado_mudado = 0
             else:
-                melhor_estado_mudado += 1
-                if i >= total_max_de_iteracoes  or melhor_estado_mudado >= total_max_de_iteracoes_sem_mudanca:
+                estado_mudado += 1
+                if i >= total_max_de_iteracoes  or estado_mudado >= total_max_de_iteracoes_sem_mudanca:
                     return melhor_estado , t_melhor_estado
 
         
@@ -127,7 +130,7 @@ class AlgoritimosAI():
             self.personagens[personagem][1] = 11
         
 
-    def boltzman(self, delta:int, tempo:int) -> float:
+    def boltzman(self, delta:float, tempo:float) -> float:
         return exp(-delta/tempo)
 
 
@@ -242,55 +245,71 @@ class AlgoritimosAI():
     def resolve_por_anneling(self) -> dict[str,list[str]]:
         while True:
             try:
-                solucao = self.gera_solucao_valida_aleatoria()
+                atual = self.gera_solucao_valida_aleatoria()
                 break
             except Exception:
                 continue
+        
+        atual_fitness = self.fitness(atual)
 
-        fitness_solucao = self.fitness(solucao)
         total_max_de_iteracoes = self.ANNEALING_FATOR_PARADA 
         total_max_de_iteracoes_sem_mudanca = self.ANNEALING_EARLY_STOP 
+        
         i = 0
-        melhor_estado_mudado = 0
-        temperatura = 1000
+        estado_mudado = 0
+        temperatura = 10
         T = temperatura / 1
         delta_estado = 0
+
         while i < total_max_de_iteracoes:
             try:
                 if random() < self.boltzman(delta_estado,T):
-                    nova_solucao = self.gera_vizinhanca(solucao)
+                    candidata = self.gera_solucao_valida_aleatoria()
+                    flag = "Boltz"
                 else:
-                    nova_solucao = self.gera_solucao_valida_aleatoria()
+                    if random() > 0.7:
+                        candidata = self.gera_vizinhanca(atual if self.min_solucao == {} else self.min_solucao)
+                        flag = "Vizinhança"
+                    else:
+                        candidata = self.gera_vizinhanca_2(atual if self.min_solucao == {} else self.min_solucao)
+                        flag = "Vizinhança_2"
             except Exception:
                 continue
             i += 1
-            fitness_nova_solucao = self.fitness(nova_solucao)
-            delta_estado = fitness_nova_solucao - fitness_solucao
-            T = temperatura / i
-            if fitness_nova_solucao < fitness_solucao or random() < self.boltzman(delta_estado,T):
-                fitness_solucao = fitness_nova_solucao
-                solucao = nova_solucao
-                melhor_estado_mudado = 0
-            else:
-                melhor_estado_mudado += 1
-                if i >= total_max_de_iteracoes  or melhor_estado_mudado >= total_max_de_iteracoes_sem_mudanca:
-                    return solucao
+            candidata_fitness = self.fitness(candidata)
+            if candidata_fitness < self.min_fitness:
+                self.min_solucao = candidata
+                self.min_fitness = candidata_fitness
+                #self.print_dict(self.min_solucao)
+                print(f"Tempo: {self.min_fitness} {flag}")
 
-        
-        return solucao
+            delta_estado = candidata_fitness - atual_fitness
+            T = temperatura / i
+
+            #print(f"i = {i} BTZ {self.boltzman(delta_estado,T)}")
+            if delta_estado < 0 or random() < self.boltzman(delta_estado,T):
+                atual = candidata
+                atual_fitness = candidata_fitness
+                estado_mudado = 0
+            else:
+                estado_mudado += 1
+                if i >= total_max_de_iteracoes  or estado_mudado >= total_max_de_iteracoes_sem_mudanca:
+                    return self.min_solucao
+
+        return self.min_solucao
     
     def test(self):
         i = 0
-        min_solucao = 2000.00
-        solucao_final = {}
+        
         while True:
+            print("Test Loop")
             solucao = self.resolve_por_anneling()
             tempo = self.calcula_tempo_solucao(solucao)
-            if tempo < min_solucao:
-                min_solucao = tempo
-                solucao_final = solucao
-                self.print_dict(solucao_final)
-                print(f"Tempo: {min_solucao}")
+            if tempo < self.min_fitness:
+                self.min_solucao = solucao
+                self.min_fitness = tempo
+                self.print_dict(self.min_solucao)
+                print(f"Tempo: {self.min_fitness}")
             
 
 AlgoritimosAI().test()

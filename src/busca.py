@@ -103,6 +103,7 @@ class Mapa():
         with open('mapa.txt', 'r') as file:
             lines = file.readlines()
         
+        self.aStarCost = 0
         self.height = len(lines)
         self.width = max(len(line) for line in lines) - 1
 
@@ -116,8 +117,6 @@ class Mapa():
                 row.append(lines[i][j])
                 if lines[i][j] in '0123456789BCEGHIJKLNOPQSTUWYZ':
                     self.eventos[lines[i][j]] = (i, j)
-                    if lines[i][j] == "Z":
-                        print(f"Z:{i,j}")
             self.mapa.append(row)
  
     def getDificuldade(evento: str) -> int:
@@ -194,7 +193,7 @@ class Mapa():
         elif quadrado == 'M':
             return 100
         else:
-            return 1
+            return 0
         
 
 MAPA = Mapa()
@@ -300,6 +299,7 @@ class AEstrela:
             #Remove node with smaller f from openList and add it to closedList
             openList.pop(currentIndex)
             closedList.append(currentNode)
+            MAPA.aStarCost += MAPA.getValor(currentNode.coord)
 
             #Found the goal
             if currentNode == goalNode:
@@ -344,6 +344,3 @@ class AEstrela:
                 neighborNode.g = tentative_g
                 neighborNode.h = manhattan(neighborNode, goalNode)
                 neighborNode.f = neighborNode.g + neighborNode.h
-
-            
-print("Linhas: %d\nColunas: %d" % (MAPA.height, MAPA.width))
