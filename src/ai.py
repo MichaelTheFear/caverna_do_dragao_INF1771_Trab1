@@ -7,9 +7,9 @@ from json import dumps
 seed()
 
 class AlgoritimosAI():
-    TOTAL_DE_ITERACOES_ANNEALING = 1e4
-    ANNEALING_FATOR_PARADA = TOTAL_DE_ITERACOES_ANNEALING // 25 
-    ANNEALING_EARLY_STOP = TOTAL_DE_ITERACOES_ANNEALING // 10
+    TOTAL_DE_ITERACOES_ANNEALING = 1e6
+    ANNEALING_FATOR_PARADA = TOTAL_DE_ITERACOES_ANNEALING 
+    ANNEALING_EARLY_STOP = TOTAL_DE_ITERACOES_ANNEALING // 50
     FASES = "123456789BCEGHIJKLNOPQSTUWYZ" # tamanho fases
     PERSONAGENS = ['Hank', 'Diana', 'Sheila', 'Presto', 'Bob', 'Eric']
     TAMANHO_FASES = len(FASES)
@@ -59,69 +59,6 @@ class AlgoritimosAI():
     MAX_COEFICIENTE = max(dificuldade.values())
 
 
-    """
-    def combincacao(self,personagens:list[str]) -> list[list[str]]:
-        personagens_validos = []
-        res = []
-        for personagem in personagens:
-            if self.personagens[personagem][1] != 11:
-                personagens_validos.append(personagem)
-
-        for i in range(1, len(personagens_validos)+1):
-            for comb in combinations(personagens_validos, i):
-                res.append(list(comb))
-        
-        return res
-        
-
-    def resolve_por_anneling(self,personagens:list[str] , fases:list[str]) -> dict[str,list[str]]:
-        solucao = {}
-        for fase in fases:
-            solucao[fase] = self.annealing(self.combincacao(personagens),self.dificuldade[fase])
-            for personagem in solucao[fase][0]:
-                self.personagens[personagem][1] += 1
-        return solucao
-
-    def escolhe_estado(self, estados:list[list[float]],coeficente_fase:int) -> list[float]:
-        #heuristica de estados aumentar a probabilidade de escolher um estado com indice menor se o coeficiente for menor
-        coeficiente = coeficente_fase / self.MAX_COEFICIENTE
-        index = int(len(estados)*coeficiente*random()) + 1 
-        return estados.pop(index)
-
-
-    def annealing(self, estados:list[list[float]], coeficiente_fase:int) -> int:
-        melhor_estado = estados[0]
-        t_melhor_estado = self.calcula_tempo_fase(melhor_estado,coeficiente_fase)
-        total_max_de_iteracoes = len(estados) * self.ANNEALING_FATOR_PARADA // 100
-        total_max_de_iteracoes_sem_mudanca = len(estados) * self.ANNEALING_EARLY_STOP // 100
-        i = 0
-        estado_mudado = 0
-        while i < total_max_de_iteracoes:
-            i += 1
-            estado = self.escolhe_estado(estados, coeficiente_fase)
-            t_estado_atual = self.calcula_tempo_fase(estado,coeficiente_fase)
-            delta_estado = t_estado_atual - t_melhor_estado
-            if t_estado_atual < t_melhor_estado or random() > self.boltzman(delta_estado,i):
-                t_melhor_estado = t_estado_atual
-                melhor_estado = estado
-                estado_mudado = 0
-            else:
-                estado_mudado += 1
-                if i >= total_max_de_iteracoes  or estado_mudado >= total_max_de_iteracoes_sem_mudanca:
-                    return melhor_estado , t_melhor_estado
-
-        
-        return melhor_estado, t_melhor_estado
-        
-    def test(self):
-        resultado = self.resolve_por_anneling(self.personagens.keys(),self.FASES)
-        print(dumps(resultado,indent=4))
-        print(dumps(self.personagens,indent=4))
-        total = 0
-        for fase in resultado:
-            total += resultado[fase][1]
-        print(f"total ecnontrado {total}")
-    """
     def print_dict(self, d:dict):
         print(dumps(d,indent=4))
 
@@ -146,7 +83,10 @@ class AlgoritimosAI():
         return todos_os_persoangem[indice]
 
     def sem_personagem_valido(self):
-        soma = sum([self.personagens[env][0] for env in self.PERSONAGENS])
+        soma = 0
+        for vezes_uso in self.personagens.values():
+            soma += vezes_uso[1]
+
         if soma > 0:
             return True
         return False
@@ -161,6 +101,7 @@ class AlgoritimosAI():
         for fase in self.FASES:
             solucao[fase] = [self.pega_personagen_aleatorio()]
         
+
         while self.sem_personagem_valido():
             fase = self.pega_fase_aleatoria()
             try:
@@ -168,6 +109,7 @@ class AlgoritimosAI():
             except:
                 break
             
+        self.reset_personagens()
         return solucao
 
     def gera_composicao_valida_aleatoria(self, personagens: list[str]) -> list[str]:
@@ -245,7 +187,7 @@ class AlgoritimosAI():
     def resolve_por_anneling(self) -> dict[str,list[str]]:
         while True:
             try:
-                atual = self.gera_solucao_valida_aleatoria()
+                atual = self.gera_solucao_aleatoria_valida_2()
                 break
             except Exception:
                 continue
@@ -263,8 +205,8 @@ class AlgoritimosAI():
 
         while i < total_max_de_iteracoes:
             try:
-                if random() < self.boltzman(delta_estado,T):
-                    candidata = self.gera_solucao_valida_aleatoria()
+                if random() < 0.5:
+                    candidata = self.gera_solucao_aleatoria_valida_2()
                     flag = "Boltz"
                 else:
                     if random() > 0.7:
@@ -284,7 +226,7 @@ class AlgoritimosAI():
                 print(f"Tempo: {self.min_fitness} {flag}")
 
             delta_estado = candidata_fitness - atual_fitness
-            T = temperatura / i
+            T = 1000 / self.min_fitness
 
             #print(f"i = {i} BTZ {self.boltzman(delta_estado,T)}")
             if delta_estado < 0 or random() < self.boltzman(delta_estado,T):
@@ -299,17 +241,13 @@ class AlgoritimosAI():
         return self.min_solucao
     
     def test(self):
-        i = 0
+        solucao = self.resolve_por_anneling()
+        tempo = self.calcula_tempo_solucao(solucao)
+        self.print_dict(solucao)
+        print(f"Tempo: {tempo}")
+
         
-        while True:
-            print("Test Loop")
-            solucao = self.resolve_por_anneling()
-            tempo = self.calcula_tempo_solucao(solucao)
-            if tempo < self.min_fitness:
-                self.min_solucao = solucao
-                self.min_fitness = tempo
-                self.print_dict(self.min_solucao)
-                print(f"Tempo: {self.min_fitness}")
+        
             
 
 AlgoritimosAI().test()
