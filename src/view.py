@@ -17,7 +17,7 @@ def dictToList(d)->list:
 
 class Caverna_Do_Dragao:
     VELOCIDADE_ANIMACAO:int = 1e10 # quanto maior mais rapido
-    SEM_ANIMACAO:bool = False
+    SEM_ANIMACAO:bool = True
     TAMANHO_DO_BLOCO:int = 6
     NUMERO_DE_LINHAS:int = MAPA.height + 2
     NUMERO_DE_COLUNAS:int = MAPA.width +2
@@ -79,7 +79,11 @@ class Caverna_Do_Dragao:
         self.CLOCK.tick(self.VELOCIDADE_ANIMACAO)
         
         inicio = self.EVENTOS[self.EVENTO_ATUAL]
-        fim = self.EVENTOS[self.PROXIMO_EVENTO]
+        try:
+            fim = self.EVENTOS[self.PROXIMO_EVENTO]
+        except IndexError:
+            self.PROXIMO_EVENTO = len(self.EVENTOS)-1
+            fim = self.EVENTOS[-1]
         self.desenha_quadrado(inicio[0], inicio[1], (209, 240, 7))
         self.desenha_quadrado(fim[0], fim[1], (240, 170, 7))
 
@@ -137,7 +141,7 @@ class Caverna_Do_Dragao:
     def proximo_caminho(self) -> None:
         self.EVENTO_ATUAL += 1
         self.PROXIMO_EVENTO += 1
-        if self.PROXIMO_EVENTO != len(self.EVENTOS) - 1:
+        if self.PROXIMO_EVENTO != len(self.EVENTOS):
             '''caminho = self.AESTRELA.solve(self.EVENTOS[self.EVENTO_ATUAL], self.EVENTOS[self.PROXIMO_EVENTO])
             for coord in caminho:
                 self.custoAEstrela += MAPA.getValor(coord)'''

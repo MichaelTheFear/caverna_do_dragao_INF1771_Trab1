@@ -308,6 +308,8 @@ class AEstrela:
                 while node != None:
                     path.append(node.coord)
                     node = node.parent
+                
+                print(f"goal coord {goal}")
                 yield {
                     "estado": "fim",
                     "caminho":path[::-1]
