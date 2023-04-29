@@ -299,7 +299,6 @@ class AEstrela:
             #Remove node with smaller f from openList and add it to closedList
             openList.pop(currentIndex)
             closedList.append(currentNode)
-            MAPA.aStarCost += MAPA.getValor(currentNode.coord)
 
             #Found the goal
             if currentNode == goalNode:
@@ -307,6 +306,7 @@ class AEstrela:
                 node = currentNode
                 while node != None:
                     path.append(node.coord)
+                    MAPA.aStarCost += MAPA.getValor(node.coord)
                     node = node.parent
                 
                 print(f"goal coord {goal}")
