@@ -143,6 +143,7 @@ class AlgoritimosAI():
     TOTAL_DE_ITERACOES_ANNEALING = 1e5
     ANNEALING_FATOR_PARADA = TOTAL_DE_ITERACOES_ANNEALING 
     ANNEALING_EARLY_STOP = TOTAL_DE_ITERACOES_ANNEALING // 10
+    MULTIPLICADOR_TEMPERATURA = TOTAL_DE_ITERACOES_ANNEALING // 100
     FASES = "123456789BCEGHIJKLNOPQSTUWYZ" # tamanho fases
     PERSONAGENS = ['Hank', 'Diana', 'Sheila', 'Presto', 'Bob', 'Eric']
     VALOR_PERSONAGEM = [1.5, 1.4, 1.3, 1.2, 1.1, 1.0]
@@ -249,6 +250,9 @@ class AlgoritimosAI():
                 personagens_index_validos.append(i)
         return personagens_index_validos[randint(0,len(personagens_index_validos)-1)]
     
+    def heuristica_vizinhanca(self, nfase:int)-> int:
+        return 2.5 * ((nfase - 1 )/ len(self.FASES))
+
     def gera_vizinhanca(self, solucao: dict[str,list[bool]]) -> dict[str,list[bool]]:
         # a media de personagens por fase é 2.5
         # pega uma fase aleatoria cuja a media seja maior que 2.5
@@ -258,7 +262,7 @@ class AlgoritimosAI():
         todas_as_fases_indexes = [i for i in range(len(self.FASES))]
         for index in range(len(self.FASES)):
             fase = self.FASES[index]
-            if self.calcula_tempo_composicao(solucao[fase]) > 2 * (index / len(self.FASES)) and solucao[fase].count(True) > 1:
+            if self.calcula_tempo_composicao(solucao[fase]) > self.heuristica_vizinhanca(index) and solucao[fase].count(True) > 1:
                 fases25.append(fase)
         fase = fases25[randint(0,len(fases25)-1)]
         todas_as_fases_indexes.remove(self.FASES.index(fase))
@@ -292,8 +296,10 @@ class AlgoritimosAI():
 
     
     def fitness(self, solucao: dict[str,list[str]]) -> int:
-        #mudar
         return self.calcula_tempo_solucao(solucao)
+    
+    def escalonador(self, iteracoes_anneling:int) -> float:
+        return self.MULTIPLICADOR_TEMPERATURA / (self.min_fitness) * iteracoes_anneling
 
     def resolve_por_anneling(self) -> dict[str,list[str]]:
         while True:
@@ -310,7 +316,7 @@ class AlgoritimosAI():
         i = 0
         estado_mudado = 1
         temperatura = 10
-        T = temperatura / 1
+        T = self.escalonador(1)
         candidata_fitness = 2000
 
         while i < total_max_de_iteracoes:
@@ -321,15 +327,17 @@ class AlgoritimosAI():
                 candidata = self.gera_vizinhanca(deepcopy(self.min_solucao) if self.min_solucao != {} else self.gera_solucao_aleatoria())
                 flag = "Vizinhança"
 
-            #sleep(0.1)
+            
            
             i += 1
             candidata_fitness = self.fitness(candidata)
-            T = 1e4 / self.min_fitness * i
+            T = self.escalonador(i)
+
             if candidata_fitness < self.min_fitness:
                 self.min_solucao = deepcopy(candidata)
                 self.min_fitness = candidata_fitness
                 print(f"Tempo: {self.min_fitness} {flag}")
+                sleep(0.1)
                 estado_mudado = 0
             else:
                 estado_mudado += 1
