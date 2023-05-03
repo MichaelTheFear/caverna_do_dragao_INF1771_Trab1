@@ -2,6 +2,7 @@ import sys
 import pygame
 import time
 from busca import MAPA, AEstrela
+from ai import AlgoritimosAI
 
 # convert dict to list in this order 0123456789BCEGHIJKLNOPQSTUWYZ
 def dictToList(d)->list:
@@ -31,13 +32,18 @@ class Caverna_Do_Dragao:
     CAMINHO:list[tuple[int,int]] = []
     NOMES_EVENTOS = "0123456789BCEGHIJKLNOPQSTUWYZ"
 
-    def __init__(self):
+    def __init__(self, ignore = None):
+        if ignore:
+            return
         pygame.init()
         self.SCREEN = pygame.display.set_mode((self.LARGURA_DA_TELA, self.ALTURA_DA_TELA))
         self.CLOCK = pygame.time.Clock()
         self.SCREEN.fill((255, 255, 255))
         self.limpa_mapa()
         self.custoAEstrela = 0
+
+    def resolve_bruto(self):
+        return self.AESTRELA.solve_todos_os_caminhos(self.EVENTOS)
 
 
         
@@ -142,9 +148,6 @@ class Caverna_Do_Dragao:
         self.EVENTO_ATUAL += 1
         self.PROXIMO_EVENTO += 1
         if self.PROXIMO_EVENTO != len(self.EVENTOS):
-            '''caminho = self.AESTRELA.solve(self.EVENTOS[self.EVENTO_ATUAL], self.EVENTOS[self.PROXIMO_EVENTO])
-            for coord in caminho:
-                self.custoAEstrela += MAPA.getValor(coord)'''
             yield self.AESTRELA.solve(self.EVENTOS[self.EVENTO_ATUAL], self.EVENTOS[self.PROXIMO_EVENTO])
     
     def game_start(self) -> None:
@@ -156,30 +159,10 @@ class Caverna_Do_Dragao:
                 if evento.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif evento.type == pygame.KEYDOWN:
-                    if evento.key == pygame.K_f:
-                        caminho_todo = not caminho_todo
-                        comeco = time.time()
-                        print(MAPA.aStarCost)
+                elif evento.type == pygame.KEYDOWN and not caminho_todo:
+                    caminho_todo = not caminho_todo
+                    comeco = time.time()
                     
-                    if evento.key == pygame.K_x:
-                        self.gera_caminho_todo_de_uma_vez()
-                    
-                    if evento.key == pygame.K_SPACE:
-                        self.limpa_mapa()
-                        caminho = self.proximo_caminho()
-                        busca = next(caminho)
-                        no = next(busca)
-                        while no["estado"] != "fim":
-                            no = next(busca)
-                            if no["estado"] == "buscando...":
-                                for i in no["vizinhos"]:
-                                    self.desenha_quadrado_animado(i[0], i[1], cor=(255, 215, 0))
-                            elif no["estado"] == "fim":
-                                self.CAMINHO.extend(no["caminho"])
-                                for i in no["caminho"]:
-                                    self.desenha_quadrado_animado(i[0], i[1], cor=(7, 232, 240))
-                        print(MAPA.aStarCost)
             if caminho_todo:
                 try:
                     next(caminho_todo_gerador)
@@ -192,4 +175,16 @@ class Caverna_Do_Dragao:
 
 
 
-Caverna_Do_Dragao().game_start()
+#Caverna_Do_Dragao().game_start()
+comeco = time.time()
+Caverna_Do_Dragao(ignore=True).resolve_bruto()
+ai = AlgoritimosAI()
+solucao = ai.resolve_por_anneling()
+fitness = ai.min_fitness
+fim = time.time()
+
+ai.print_solucao(solucao)
+print(f"Tempo de execução: {fim - comeco}")
+print(f"Tempo A*: {MAPA.aStarCost}")
+print(f"Tempo Anneling: {fitness}")
+print(f"Tempo Total: {MAPA.aStarCost + fitness}")

@@ -7,96 +7,6 @@ PERSONAGENS = {
     "Bob": [1.1,0],
     "Eric": [1.0,0]
 }
-'''
-MAPA = []
-
-def loadMapa() -> None:
-    with open('mapa.txt', 'r') as file:
-        lines = file.readlines()
-        for i in range(len(lines)):
-            MAPA.append([])
-            for j in range(len(lines[i]) - 1):
-                MAPA[i].append(lines[i][j])
-                # botar pra atualizar o numero de linhas e colunas e a largura e altura da tela
-
-def getDificuldade(evento: str) -> int:
-    if evento == '1':
-        return 10
-    elif evento == '2':
-        return 20
-    elif evento == '3':
-        return 30
-    elif evento == '4':
-        return 60
-    elif evento == '5':
-        return 65
-    elif evento == '6':
-        return 70
-    elif evento == '7':
-        return 75
-    elif evento == '8':
-        return 80
-    elif evento == '9':
-        return 85
-    elif evento == 'B':
-        return 90
-    elif evento == 'C':
-        return 95
-    elif evento == 'E':
-        return 100
-    elif evento == 'G':
-        return 110
-    elif evento == 'H':
-        return 120
-    elif evento == 'I':
-        return 130
-    elif evento == 'J':
-        return 140
-    elif evento == 'K':
-        return 150
-    elif evento == 'L':
-        return 160
-    elif evento == 'N':
-        return 170
-    elif evento == 'O':
-        return 180
-    elif evento == 'P':
-        return 190
-    elif evento == 'Q':
-        return 200
-    elif evento == 'S':
-        return 210
-    elif evento == 'T':
-        return 220
-    elif evento == 'U':
-        return 230
-    elif evento == 'W':
-        return 240
-    elif evento == 'Y':
-        return 250
-    elif evento == 'Z':
-        return 260
-
-def getValor(quadrado: str) -> int:
-    if quadrado == '.':
-        return 1
-    elif quadrado == 'R':
-        return 5
-    elif quadrado == 'D':
-        return 10
-    elif quadrado == 'F':
-        return 15
-    elif quadrado == 'A':
-        return 20
-    elif quadrado == 'M':
-        return 100
-    else:
-        return 1
-
-loadMapa()
-'''
-
-
 
 class Mapa():
     def __init__(self):
@@ -263,7 +173,6 @@ class AEstrela:
         res = []
         for index in range(len(nodes) - 1):
             current = self.solve(nodes[index], nodes[index+1])
-            print(f"current: {current}")
             while True:
                 try:
                     current_path = next(current)
@@ -309,7 +218,6 @@ class AEstrela:
                     MAPA.aStarCost += MAPA.getValor(node.coord)
                     node = node.parent
                 
-                print(f"goal coord {goal}")
                 yield {
                     "estado": "fim",
                     "caminho":path[::-1]
@@ -346,3 +254,5 @@ class AEstrela:
                 neighborNode.g = tentative_g
                 neighborNode.h = manhattan(neighborNode, goalNode)
                 neighborNode.f = neighborNode.g + neighborNode.h
+
+
